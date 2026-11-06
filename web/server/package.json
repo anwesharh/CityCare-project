@@ -1,0 +1,26 @@
+{
+  "name": "citycare-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.1",
+    "googleapis": "^188.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "livekit-server-sdk": "^2.19.2",
+    "mongoose": "^9.11.4"
+  }
+}

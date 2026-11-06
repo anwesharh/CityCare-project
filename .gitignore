@@ -1,0 +1,34 @@
+# dependencies and builds
+node_modules/
+dist/
+build/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+secrets/
+*oauth*.json
+client_secret*.json
+service-account*.json
+
+# private clinic config (only example-*.yaml is public)
+receptionist/config/businesses/*.yaml
+!receptionist/config/businesses/example-*.yaml
+
+# local data and logs
+messages/
+transcripts/
+recordings/
+*.log
+*log.txt
+agentlog*
+*.zip
+.DS_Store
+Thumbs.db

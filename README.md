@@ -62,9 +62,4 @@ Secrets (`.env` files, calendar tokens, the clinic config) are never committed.
 - Receptionist: `pytest` (700+ tests)
 - Website server: `npm test`
 
-## Credits and license
 
-The voice agent in `receptionist/` is built on [kirklandsig/AIReceptionist](https://github.com/kirklandsig/AIReceptionist)
-and remains under the **GNU AGPL-3.0** (see `receptionist/LICENSE`). Added in this project: Sarvam and
-Gemini Live support, Indian languages and dates, doctors and OPD tokens, cancel/reschedule, emergency
-alerts, hospital features and the website integration. The website in `web/` is original work.

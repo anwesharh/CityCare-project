@@ -94,13 +94,14 @@ export async function readPrescription(buffer, contentType) {
   });
   const models = config.gemini.models;
   let lastError = 'no model answered';
-  for (let attempt = 0; attempt < models.length + 1; attempt += 1) {
+  const deadline = Date.now() + (process.env.VERCEL ? 50000 : 150000); // Vercel stops a function at 60 s
+  for (let attempt = 0; attempt < models.length + 1 && Date.now() < deadline - 5000; attempt += 1) {
     const model = models[Math.min(attempt, models.length - 1)];
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': config.gemini.apiKey },
-          body, signal: AbortSignal.timeout(60000) },
+          body, signal: AbortSignal.timeout(Math.min(40000, deadline - Date.now())) },
       );
       if (!res.ok) { lastError = `${model}: HTTP ${res.status}`; await new Promise((r) => setTimeout(r, 800 * (attempt + 1))); continue; }
       const data = await res.json();

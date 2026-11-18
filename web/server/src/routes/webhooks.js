@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import { config } from '../config.js';
 import { Alert, Call, Message, Patient, Report, phoneKey } from '../models/index.js';
 import { summariseCall } from '../lib/summary.js';
+import { runInBackground } from '../lib/background.js';
 import { getSettings } from '../lib/settings.js';
 
 const router = Router();
@@ -122,8 +123,7 @@ router.post('/agent', guard, async (req, res, next) => {
 
     res.json({ ok: true, id: saved._id });
 
-    summariseCall(saved).then((summary) => (summary ? Call.updateOne({ _id: saved._id }, { summary }) : null))
-      .catch((e) => console.error('[summary] failed:', e.message));
+    runInBackground(summariseCall(saved).then((summary) => (summary ? Call.updateOne({ _id: saved._id }, { summary }) : null)), 'summary');
   } catch (e) { next(e); }
 });
 

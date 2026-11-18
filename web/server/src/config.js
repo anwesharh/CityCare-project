@@ -4,7 +4,7 @@ import path from 'node:path';
 
 function required(name) {
   const v = process.env[name];
-  if (!v) throw new Error(`Missing ${name} in server/.env`);
+  if (!v) throw new Error(`Missing ${name} in server/.env (or in Vercel's Environment Variables)`);
   return v;
 }
 
@@ -31,6 +31,8 @@ export const config = {
   webhookSecret: process.env.DASHBOARD_WEBHOOK_SECRET || '',
   calendar: {
     tokenFile: resolveFromServer(process.env.GOOGLE_OAUTH_TOKEN_FILE),
+    // On Vercel there is no file: paste the whole google-calendar-oauth.json content into this variable instead.
+    tokenJson: process.env.GOOGLE_OAUTH_TOKEN_JSON || '',
     calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
     timezone: process.env.CLINIC_TIMEZONE || 'Asia/Kolkata',
   },

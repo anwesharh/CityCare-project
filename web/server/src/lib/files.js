@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 
 export const ALLOWED_TYPES = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-export const MAX_BYTES = 8 * 1024 * 1024;
+export const MAX_BYTES = (process.env.VERCEL ? 4 : 8) * 1024 * 1024; // Vercel's request limit is 4.5 MB
 
 /** Express middleware: one file in field "file", kept in memory, 8 MB max, PDF/JPG/PNG/WEBP only. */
 export const uploadOne = multer({
@@ -18,7 +18,7 @@ export const uploadOne = multer({
 export function receiveFile(req, res, next) {
   uploadOne(req, res, (err) => {
     if (!err) return next();
-    const msg = err.code === 'LIMIT_FILE_SIZE' ? 'File is larger than 8 MB' : err.message;
+    const msg = err.code === 'LIMIT_FILE_SIZE' ? `File is larger than ${MAX_BYTES / 1048576} MB` : err.message;
     return res.status(400).json({ error: msg });
   });
 }

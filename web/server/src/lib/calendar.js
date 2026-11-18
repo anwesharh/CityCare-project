@@ -9,7 +9,7 @@ import { config } from '../config.js';
 let cachedCalendar = null;
 
 export function calendarConfigured() {
-  return Boolean(config.calendar.tokenFile && fs.existsSync(config.calendar.tokenFile));
+  return Boolean(config.calendar.tokenJson || (config.calendar.tokenFile && fs.existsSync(config.calendar.tokenFile)));
 }
 
 function getCalendar() {
@@ -19,7 +19,7 @@ function getCalendar() {
     err.status = 503;
     throw err;
   }
-  const saved = JSON.parse(fs.readFileSync(config.calendar.tokenFile, 'utf8'));
+  const saved = JSON.parse(config.calendar.tokenJson || fs.readFileSync(config.calendar.tokenFile, 'utf8'));
   const auth = new google.auth.OAuth2(saved.client_id, saved.client_secret);
   auth.setCredentials({ refresh_token: saved.refresh_token });
   cachedCalendar = google.calendar({ version: 'v3', auth });

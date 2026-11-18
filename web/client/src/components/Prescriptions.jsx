@@ -48,7 +48,7 @@ export function UploadPrescription({ who, patientKey, onAdded }) {
       <input ref={input} type="file" accept="image/*,application/pdf" className="sr-only" id={`rx-up-${who}`} onChange={pick} />
       <div><label htmlFor={`rx-up-${who}`} className={`btn btn-primary${busy ? ' disabled' : ''}`} aria-disabled={busy}>
         {busy ? 'Uploading…' : '+ Add prescription (photo or PDF)'}</label></div>
-      <span className="muted small">Take a clear, well-lit photo of the whole page. Max 8 MB.</span>
+      <span className="muted small">Take a clear, well-lit photo of the whole page. PDFs up to 4 MB.</span>
       {error && <p className="error-note" role="alert">{error}</p>}
     </div>
   );

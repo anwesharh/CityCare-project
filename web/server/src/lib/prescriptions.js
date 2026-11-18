@@ -2,6 +2,7 @@
 import { Prescription } from '../models/index.js';
 import { readFile, saveFile } from './files.js';
 import { readPrescription } from './ocr.js';
+import { runInBackground } from './background.js';
 
 const today = () => new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10); // IST date
 
@@ -9,7 +10,7 @@ const today = () => new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10
 export async function createPrescription(file, { phoneKey, patientName, source, uploadedBy }) {
   const stored = await saveFile(file, { kind: 'prescription', phoneKey });
   const rx = await Prescription.create({ phoneKey, patientName, source, uploadedBy, file: stored, date: today(), status: 'reading' });
-  processPrescription(rx._id, file.buffer, file.mimetype).catch(() => {});
+  runInBackground(processPrescription(rx._id, file.buffer, file.mimetype), 'prescription');
   return rx;
 }
 
@@ -36,7 +37,7 @@ export async function retryPrescription(rx) {
   rx.status = 'reading'; rx.error = '';
   await rx.save();
   const buf = await readFile(rx.file.id);
-  processPrescription(rx._id, buf, rx.file.contentType).catch(() => {});
+  runInBackground(processPrescription(rx._id, buf, rx.file.contentType), 'prescription');
   return rx;
 }
 

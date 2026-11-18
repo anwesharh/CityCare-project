@@ -61,7 +61,21 @@ export async function patientApi(path, { method = 'GET', body } = {}) {
 }
 
 /** Upload one file (field "file") to /api{path}. who: 'staff' | 'patient'. */
-export async function uploadFile(path, file, who = 'staff') {
+/** Photos from phones are often 3–8 MB: resize to max 2000 px as JPEG so uploads are fast and fit the server limit. */
+async function shrinkImage(file) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 1.5 * 1024 * 1024) return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+    const canvas = Object.assign(document.createElement('canvas'), { width: Math.round(bmp.width * scale), height: Math.round(bmp.height * scale) });
+    canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.85));
+    return blob ? new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file;
+  } catch { return file; }
+}
+
+export async function uploadFile(path, original, who = 'staff') {
+  const file = await shrinkImage(original);
   const fd = new FormData();
   fd.append('file', file);
   const t = tokenFor(who);

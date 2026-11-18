@@ -25,7 +25,7 @@ export function appointmentsByPhone(appointments) {
   return map;
 }
 
-async function calendarWindow(pastDays = 180, futureDays = 60) {
+export async function calendarWindow(pastDays = 180, futureDays = 60) {
   if (!calendarConfigured()) return [];
   const now = Date.now();
   try { return await listAppointments({ from: new Date(now - pastDays * DAY), to: new Date(now + futureDays * DAY) }); }

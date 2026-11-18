@@ -4,9 +4,19 @@ import mongoose from 'mongoose';
 import { hashPassword, requireAuth, requireRole } from '../lib/auth.js';
 import { User } from '../models/index.js';
 import { SAMPLE_HOSPITAL, getSettings, saveSettings } from '../lib/settings.js';
+import { emailConfigured, sendTestEmail } from '../lib/mailer.js';
 
 const router = Router();
 router.use(requireAuth);
+
+// Patient-login email: is it set up, and does it work?
+router.get('/email-status', requireRole('admin'), (_req, res) => res.json({ configured: emailConfigured() }));
+router.post('/email-test', requireRole('admin'), async (req, res) => {
+  const to = String(req.body?.to || req.user.email || '').trim();
+  if (!emailConfigured()) return res.status(400).json({ error: 'Email is not set up yet: add SMTP_USER and SMTP_PASS to server/.env and restart.' });
+  try { await sendTestEmail(to); return res.json({ ok: true, to }); }
+  catch (e) { return res.status(502).json({ error: `Sending failed: ${e.message}` }); }
+});
 
 // Sample hospital data (departments, lab tests, packages...) for the "Fill sample hospital data" button.
 router.get('/settings/sample-hospital', requireRole('admin'), (_req, res) => res.json({ sample: SAMPLE_HOSPITAL }));

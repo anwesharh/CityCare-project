@@ -20,6 +20,7 @@ import Account from './pages/Account.jsx';
 import OpdBoard from './pages/OpdBoard.jsx';
 import Reports from './pages/Reports.jsx';
 import QueueDisplay from './pages/QueueDisplay.jsx';
+import PatientPortal from './pages/PatientPortal.jsx';
 import { RequireAuth } from './components/AdminLayout.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -29,7 +30,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/talk" element={<Talk />} />
         <Route path="/queue" element={<QueueDisplay />} />
-        <Route path="/admin/login" element={<Login />} />
+        <Route path="/login" element={<Login key="l" />} />
+        <Route path="/patient/login" element={<Login key="p" initial="patient" />} />
+        <Route path="/patient" element={<PatientPortal />} />
+        <Route path="/admin/login" element={<Login key="s" initial="staff" />} />
         <Route path="/admin" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="/admin/appointments" element={<RequireAuth><Appointments /></RequireAuth>} />
         <Route path="/admin/calls" element={<RequireAuth roles={['admin', 'staff', 'doctor']}><Calls /></RequireAuth>} />

@@ -60,6 +60,13 @@ const patientSchema = new mongoose.Schema({
   email: String,
   notes: { type: String, default: '' },
   lastSeenAt: Date,
+  // patient-portal login code (hashed, short-lived)
+  otpHash: String,
+  otpExpires: Date,
+  otpTries: { type: Number, default: 0 },
+  otpSentAt: Date,
+  otpEmail: String,            // email a sign-up code was sent to (saved once verified)
+  portalLastLogin: Date,
 }, { timestamps: true });
 
 const dayHours = { open: String, close: String };
@@ -125,8 +132,42 @@ const reportSchema = new mongoose.Schema({
   collectedAt: Date,
   notes: String,
   updatedBy: String,
+  file: { id: mongoose.Schema.Types.ObjectId, name: String, contentType: String, size: Number, uploadedAt: Date },
 }, { timestamps: true });
 reportSchema.index({ createdAt: -1 });
+
+/** A saved prescription: the original photo/PDF plus the medicines read from it. */
+const medicineSchema = new mongoose.Schema({
+  name: String,
+  strength: String,
+  form: String,
+  dose: String,
+  frequencyText: String,       // as written: 1-0-1, BD, TDS...
+  timing: String,              // before food / after food
+  durationDays: Number,
+  instructions: String,
+  category: String,            // e.g. "Antibiotic" (from the name pattern)
+  verified: { type: Boolean, default: true }, // name actually found in the read text
+  times: [String],             // reminder times, HH:MM
+  reminders: { type: Boolean, default: true },
+}, { _id: true });
+
+const prescriptionSchema = new mongoose.Schema({
+  phoneKey: { type: String, required: true, index: true },
+  patientName: String,
+  doctor: String,
+  date: String,                // YYYY-MM-DD written on the prescription (or upload day)
+  advice: String,
+  writtenName: String,         // patient name as written on the prescription
+  text: String,                // all text read from the image
+  medicines: [medicineSchema],
+  status: { type: String, enum: ['reading', 'done', 'failed'], default: 'reading' },
+  error: String,
+  source: { type: String, enum: ['patient', 'staff'], default: 'patient' },
+  uploadedBy: String,
+  file: { id: mongoose.Schema.Types.ObjectId, name: String, contentType: String, size: Number },
+}, { timestamps: true });
+prescriptionSchema.index({ phoneKey: 1, createdAt: -1 });
 
 /** Live emergency alert sent by the agent during a call. */
 const alertSchema = new mongoose.Schema({
@@ -157,3 +198,4 @@ export const Settings = mongoose.model('Settings', settingsSchema);
 export const Report = mongoose.model('Report', reportSchema);
 export const Alert = mongoose.model('Alert', alertSchema);
 export const QueueState = mongoose.model('QueueState', queueSchema);
+export const Prescription = mongoose.model('Prescription', prescriptionSchema);

@@ -34,6 +34,14 @@ export const config = {
     calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
     timezone: process.env.CLINIC_TIMEZONE || 'Asia/Kolkata',
   },
+  smtp: {
+    // Gmail: SMTP_USER=you@gmail.com, SMTP_PASS=16-letter app password (Google account → Security → App passwords)
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT || 465),
+    user: process.env.SMTP_USER || '',
+    pass: (process.env.SMTP_PASS || '').replace(/\s+/g, ''),
+    from: process.env.SMTP_FROM || process.env.SMTP_USER || '',
+  },
   gemini: {
     apiKey: process.env.GOOGLE_API_KEY || '',
     models: (process.env.GEMINI_SUMMARY_MODELS ||

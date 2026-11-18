@@ -21,6 +21,8 @@
     "googleapis": "^188.0.0",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.19.2",
-    "mongoose": "^9.11.4"
+    "mongoose": "^9.11.4",
+    "multer": "^2.5.0",
+    "nodemailer": "^10.6.0"
   }
 }

@@ -25,30 +25,35 @@ export default function Home() {
   const isHospital = Boolean(clinic.departments?.length || em.phone || lab?.tests?.length);
   const services = isHospital && lab?.tests?.length ? [...SERVICES, ...HOSPITAL_SERVICES] : SERVICES;
   const doctorGroups = groupDoctors(clinic.doctors || []);
+  const firstDoctor = clinic.doctors?.[0]?.name || 'the doctor';
   return (
     <div className="page">
       <SiteHeader />
 
-      <section className="container hero">
+      <section className="container hero hero-c">
         <div className="hero-copy">
-          <span className="tag">AI receptionist · {clinic.languages}</span>
-          <h1 className="hero-title">Book, cancel or reschedule your visit — just by talking.</h1>
-          <p className="lead">Our receptionist answers questions about fees, doctors and timings, and books appointments
-            straight into the clinic calendar. Day or night, no waiting on hold.</p>
+          <p className="hero-hello">Hello · নমস্কার · नमस्ते</p>
+          <h1 className="hero-title-c">Need an appointment? Just tell us what you need.</h1>
+          <p className="lead">Our receptionist answers day and night in {langList(clinic.languages)}.
+            Ask about doctors, fees, lab tests or your report, and book in the same conversation.</p>
           <div className="hero-actions">
-            <Link to="/talk" className="btn btn-primary btn-pill btn-lg"><MicIcon /> Talk to our receptionist</Link>
-            <a href="#hours" className="link-strong">See timings</a>
+            <Link to="/talk" className="btn btn-primary btn-pill btn-lg"><MicIcon /> Start talking</Link>
+            <Link to="/talk" className="btn btn-pill btn-lg">Type instead</Link>
           </div>
-          <p className="muted small">Uses your microphone in the browser. Calls may be recorded for quality. No medical advice is given.</p>
+          <p className="muted small">Works in your browser. No app or account needed. For emergencies call {em.phone ? `${em.phone} or 112` : '112'}.</p>
         </div>
-        <div className="card hero-chat" aria-label="Example conversation">
-          <div className="chat-head">
-            <div className="chat-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M3 12h2M7 8v8M11 5v14M15 8v8M19 11v2" /></svg></div>
-            <div><strong>Receptionist</strong><br /><span className="muted small">Example conversation</span></div>
-          </div>
-          <div className="bubble bubble-agent">Namaste, thank you for calling {clinic.clinicName}. How can I help you today?</div>
-          <div className="bubble bubble-you">I'd like to see Dr. Sen tomorrow evening.</div>
-          <div className="bubble bubble-agent">I have 6:00 PM or 6:30 PM free tomorrow. Which suits you?</div>
+        <div className="how-card" aria-labelledby="how-h">
+          <h2 id="how-h" className="how-title">How it works</h2>
+          <ol className="how-steps">
+            <li><span className="how-n" aria-hidden="true">1</span><div><strong>Say what you need</strong>
+              <span>“Kal shaam {firstDoctor} ke saath appointment chahiye.”</span></div></li>
+            <li><span className="how-n" aria-hidden="true">2</span><div><strong>Pick a time</strong>
+              <span>It reads {firstDoctor}'s free slots and offers the nearest ones.</span></div></li>
+            <li><span className="how-n" aria-hidden="true">3</span><div><strong>Get your token</strong>
+              <span>Your booking and OPD token appear in your patient portal.</span></div></li>
+          </ol>
+          <div className="how-ask"><span className="how-ask-label">You could also ask</span>
+            “আমার রিপোর্ট কি রেডি?” · “Is an ICU bed free?” · “What does a full body check-up cost?”</div>
         </div>
       </section>
 
@@ -181,4 +186,11 @@ function groupDoctors(doctors) {
     map.get(k).push(d);
   }
   return [...map.entries()];
+}
+
+/** "English · বাংলা · हिन्दी" → "English, বাংলা or हिन्दी" */
+function langList(langs) {
+  const l = String(langs || '').split('·').map((x) => x.trim()).filter(Boolean);
+  if (l.length === 0) return 'English, Bengali or Hindi';
+  return l.length === 1 ? l[0] : `${l.slice(0, -1).join(', ')} or ${l.at(-1)}`;
 }

@@ -231,3 +231,53 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .filters input, .table input { min-height: 40px; border: 1px solid var(--input); border-radius: 10px; padding: 6px 10px; font-size: 15px; background: #fff; color: var(--ink); }
 .table input:not(.num-input) { width: 100%; max-width: 220px; }
 .filters input { min-width: 240px; }
+
+/* ---------- patient portal ---------- */
+.portal { min-height: 100vh; background: var(--bg, #F6F8F7); }
+.stack-sm { display: flex; flex-direction: column; gap: 6px; }
+.link-btn { background: none; border: 0; padding: 4px 0; color: var(--teal-dark); font-weight: 600; cursor: pointer; text-decoration: underline; }
+.link-btn:disabled { opacity: .5; cursor: default; }
+.btn.disabled { opacity: .6; pointer-events: none; }
+.rx-card { gap: 12px; border: 1px solid var(--line-3); box-shadow: none; }
+.rx-table td { vertical-align: top; }
+.rx-edit { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.rx-times { border: 0; padding: 0; margin: 0; grid-column: 1 / -1; }
+.rx-times legend { font-weight: 600; margin-bottom: 6px; }
+.rx-text { white-space: pre-wrap; background: #F3F6F5; border-radius: 12px; padding: 12px; font-size: 14px; max-height: 260px; overflow: auto; }
+.dose-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.dose { display: flex; gap: 14px; align-items: baseline; padding: 10px 14px; border-radius: 12px; background: var(--teal-soft); }
+.dose.past { background: #F1F3F2; color: var(--ink-3); }
+.dose-time { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 52px; color: var(--teal-dark); }
+.dose.past .dose-time { color: var(--ink-3); }
+.appt-card { border: 1px solid var(--line-3); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.queue-live { color: var(--teal-dark); }
+.plain-list { margin: 8px 0 0; padding-left: 18px; }
+@media (max-width: 560px) { .hide-sm { display: none; } }
+.portal main { min-width: 0; }
+.portal .card, .rx-card, .table-wrap { min-width: 0; max-width: 100%; }
+.rx-table .check { display: inline-flex; align-items: center; gap: 8px; min-height: 0; }
+.rx-table .check input { width: 18px; height: 18px; margin: 0; flex: none; }
+@media (max-width: 640px) {
+  .rx-table thead { display: none; }
+  .rx-table, .rx-table tbody, .rx-table tr, .rx-table td { display: block; width: 100%; }
+  .rx-table tr { border-bottom: 1px solid var(--line-3); padding: 10px 0; }
+  .rx-table td { border: 0; padding: 2px 0; }
+  .portal .table:not(.rx-table) th:nth-child(2), .portal .table:not(.rx-table) td:nth-child(2) { display: none; }
+}
+.table-wrap { position: relative; }
+.seg-full { display: flex; }
+.seg-full .seg-btn { flex: 1; }
+.grow { flex: 1; min-width: 200px; }
+
+/* ---------- home hero (option C) ---------- */
+.hero-c { padding-block: 72px 64px; }
+.hero-hello { font-size: 15px; font-weight: 600; color: var(--teal); letter-spacing: .02em; }
+.hero-title-c { font-size: clamp(32px, 4vw, 42px); line-height: 1.2; font-weight: 600; letter-spacing: -0.01em; }
+.how-card { flex: 1 1 420px; min-width: 0; background: var(--teal-dark); color: #fff; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 22px; }
+.how-title { font-size: 20px; font-weight: 700; color: #fff; }
+.how-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.how-steps li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: #D6E8E4; }
+.how-steps strong { display: block; color: #fff; font-size: 16px; }
+.how-n { flex: none; width: 30px; height: 30px; border-radius: 999px; background: rgba(255, 255, 255, .12); display: grid; place-items: center; font-weight: 700; color: #fff; }
+.how-ask { background: rgba(255, 255, 255, .08); border-radius: 14px; padding: 14px 16px; font-size: 15px; line-height: 1.5; }
+.how-ask-label { display: block; font-size: 12px; color: #9FC7BF; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }

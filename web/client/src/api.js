@@ -34,3 +34,55 @@ export const fmtDate = (d) => (d ? fmt({ weekday: 'short', day: 'numeric', month
 export const fmtDateTime = (d) => (d ? `${fmtDate(d)}, ${fmtTime(d)}` : '');
 export const fmtDuration = (s) => (s == null ? '' : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`);
 export const todayIST = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+
+// ---------------- patient portal ----------------
+const PKEY = 'citycare_patient';
+export const patientAuth = {
+  get token() { try { return localStorage.getItem(PKEY); } catch { return null; } },
+  set(token) { try { localStorage.setItem(PKEY, token); } catch { /* private mode */ } },
+  clear() { try { localStorage.removeItem(PKEY); } catch { /* ignore */ } },
+};
+
+const tokenFor = (who) => (who === 'patient' ? patientAuth.token : auth.token);
+
+function onUnauthorized(who) {
+  if (who === 'patient') { patientAuth.clear(); window.location.assign('/patient/login'); }
+  else { auth.clear(); window.location.assign('/admin/login'); }
+}
+
+export async function patientApi(path, { method = 'GET', body } = {}) {
+  const headers = { 'content-type': 'application/json' };
+  if (patientAuth.token) headers.authorization = `Bearer ${patientAuth.token}`;
+  const res = await fetch(`/api/patient${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && patientAuth.token) onUnauthorized('patient');
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+/** Upload one file (field "file") to /api{path}. who: 'staff' | 'patient'. */
+export async function uploadFile(path, file, who = 'staff') {
+  const fd = new FormData();
+  fd.append('file', file);
+  const t = tokenFor(who);
+  const res = await fetch(`/api${path}`, { method: 'POST', headers: t ? { authorization: `Bearer ${t}` } : {}, body: fd });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) onUnauthorized(who);
+  if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+  return data;
+}
+
+/** Open a protected file (PDF/photo) in a new tab, or download it (download=true). */
+export async function openFile(path, who = 'staff', { download = false, filename } = {}) {
+  const win = download ? null : window.open('', '_blank');
+  try {
+    const t = tokenFor(who);
+    const res = await fetch(`/api${path}`, { headers: t ? { authorization: `Bearer ${t}` } : {} });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Could not open the file'); }
+    const url = URL.createObjectURL(await res.blob());
+    if (download) {
+      Object.assign(document.createElement('a'), { href: url, download: filename || 'file' }).click();
+    } else if (win) { win.location.href = url; } else { window.location.assign(url); }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) { if (win) win.close(); throw e; }
+}

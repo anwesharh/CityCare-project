@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AdminLayout, { Badge, ErrorNote } from '../components/AdminLayout.jsx';
-import { api, fmtDate, fmtDateTime, fmtDuration, fmtTime } from '../api.js';
+import { api, auth, fmtDate, fmtDateTime, fmtDuration, fmtTime } from '../api.js';
+import { StaffPrescriptions } from '../components/Prescriptions.jsx';
 
 export default function PatientDetail() {
   const { key } = useParams();
   const [data, setData] = useState(null);
   const [notes, setNotes] = useState('');
+  const [email, setEmail] = useState('');
   const [saved, setSaved] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api(`/admin/patients/${key}`).then((d) => { setData(d); setNotes(d.patient.notes || ''); }).catch((e) => setError(e.message));
+    api(`/admin/patients/${key}`).then((d) => { setData(d); setNotes(d.patient.notes || ''); setEmail(d.patient.email || ''); }).catch((e) => setError(e.message));
   }, [key]);
 
   async function saveNotes(e) {
     e.preventDefault();
-    try { await api(`/admin/patients/${key}`, { method: 'PATCH', body: { notes } }); setSaved('Saved'); setTimeout(() => setSaved(''), 2000); }
+    try { await api(`/admin/patients/${key}`, { method: 'PATCH', body: { notes, email } }); setSaved('Saved'); setTimeout(() => setSaved(''), 2000); }
     catch (err) { setError(err.message); }
   }
 
@@ -52,13 +54,18 @@ export default function PatientDetail() {
           </div>
         </section>
         <form className="card grow-2" onSubmit={saveNotes}>
-          <h2 className="h-card">Staff notes</h2>
+          <h2 className="h-card">Portal login and notes</h2>
+          <label className="field">Email (the patient logs in to the portal with a code sent here)
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="patient@example.com" />
+          </label>
           <label className="field">Private notes (not shared with the patient)
             <textarea rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. prefers evening slots, follow-up due in March" />
           </label>
-          <div className="row gap"><button type="submit" className="btn btn-primary">Save notes</button><span className="muted small" aria-live="polite">{saved}</span></div>
+          <div className="row gap"><button type="submit" className="btn btn-primary">Save</button><span className="muted small" aria-live="polite">{saved}</span></div>
         </form>
       </div>
+
+      <StaffPrescriptions patientKey={patient.phoneKey} canDelete={['admin', 'doctor'].includes(auth.user?.role)} />
 
       <div className="split">
         <section className="card grow-3">

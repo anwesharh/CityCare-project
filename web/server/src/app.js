@@ -11,6 +11,8 @@ import adminRoutes from './routes/admin.js';
 import manageRoutes from './routes/manage.js';
 import insightRoutes from './routes/insights.js';
 import hospitalRoutes from './routes/hospital.js';
+import staffRxRoutes from './routes/staffRx.js';
+import patientRoutes from './routes/patient.js';
 
 export function createApp() {
   const app = express();
@@ -26,6 +28,8 @@ export function createApp() {
   app.use('/api/admin', manageRoutes);
   app.use('/api/admin', insightRoutes);
   app.use('/api/admin', hospitalRoutes);
+  app.use('/api/admin', staffRxRoutes);
+  app.use('/api/patient', patientRoutes);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
   // In production, serve the built React app from client/dist.

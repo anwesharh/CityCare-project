@@ -2,7 +2,8 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { requireAuth, requireRole } from '../lib/auth.js';
-import { Alert, Report, phoneKey } from '../models/index.js';
+import { Alert, Patient, Report, phoneKey } from '../models/index.js';
+import { deleteFile, receiveFile, saveFile, sendFile } from '../lib/files.js';
 import { getSettings, saveBeds } from '../lib/settings.js';
 import { getQueue, moveQueue } from '../lib/queue.js';
 import { sameDoctor } from '../lib/calendar.js';
@@ -74,6 +75,7 @@ router.post('/reports', reportRoles, async (req, res, next) => {
       status: STATUSES.includes(b.status) ? b.status : 'processing', notes: str(b.notes, 500),
       readyAt: b.status === 'ready' ? new Date() : undefined, updatedBy: req.user.name || req.user.email,
     });
+    await linkPatient(phone, str(b.patientName), str(b.email, 200));
     return res.status(201).json({ report });
   } catch (e) { return next(e); }
 });
@@ -101,10 +103,47 @@ router.patch('/reports/:id', reportRoles, async (req, res, next) => {
 router.delete('/reports/:id', requireRole('admin', 'lab'), async (req, res, next) => {
   try {
     if (!isId(req.params.id)) return res.status(404).json({ error: 'Not found' });
+    const r = await Report.findById(req.params.id).lean();
+    await deleteFile(r?.file?.id);
     await Report.deleteOne({ _id: req.params.id });
     return res.json({ ok: true });
   } catch (e) { return next(e); }
 });
+
+/** Attach the report PDF/photo. The patient can download it from the portal once it's ready. */
+router.post('/reports/:id/file', reportRoles, receiveFile, async (req, res, next) => {
+  try {
+    if (!isId(req.params.id)) return res.status(404).json({ error: 'Not found' });
+    if (!req.file) return res.status(400).json({ error: 'Choose a PDF or photo' });
+    const r = await Report.findById(req.params.id);
+    if (!r) return res.status(404).json({ error: 'Not found' });
+    const old = r.file?.id;
+    const stored = await saveFile(req.file, { kind: 'report', phoneKey: r.phoneKey });
+    r.file = { ...stored, uploadedAt: new Date() };
+    if (r.status === 'processing') { r.status = 'ready'; r.readyAt = new Date(); }
+    r.updatedBy = req.user.name || req.user.email;
+    await r.save();
+    await deleteFile(old);
+    return res.json({ report: r });
+  } catch (e) { return next(e); }
+});
+
+router.get('/reports/:id/file', reportRoles, async (req, res, next) => {
+  try {
+    if (!isId(req.params.id)) return res.status(404).json({ error: 'Not found' });
+    const r = await Report.findById(req.params.id).lean();
+    return r?.file?.id ? sendFile(res, r.file) : res.status(404).json({ error: 'No file' });
+  } catch (e) { return next(e); }
+});
+
+/** Make sure the patient exists (so they can log in to the portal) and save their email if given. */
+export async function linkPatient(phone, name, email) {
+  const key = phoneKey(phone);
+  if (key.length < 10) return;
+  const $set = { phone };
+  if (email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) $set.email = email.toLowerCase();
+  await Patient.updateOne({ phoneKey: key }, { $set, $setOnInsert: { name: name || undefined } }, { upsert: true });
+}
 
 // ---------- live emergency alerts ----------
 router.get('/alerts', async (req, res, next) => {

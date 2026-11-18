@@ -87,7 +87,9 @@ router.post('/report-status', guard, async (req, res, next) => {
     res.json({
       reports: reports.map((r) => ({ test: r.test, status: r.status, date: fmt(r.createdAt),
         expected: r.expectedOn ? fmt(`${r.expectedOn}T12:00:00+05:30`) : '' })),
-      collect: settings.lab?.collectInfo || '',
+      collect: [settings.lab?.collectInfo, reports.some((r) => r.file?.id && r.status !== 'processing')
+        ? 'Ready reports can also be downloaded from the patient portal on our website (log in with this phone number).' : '']
+        .filter(Boolean).join(' '),
     });
   } catch (e) { next(e); }
 });

@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import {
   DepartmentDatalist, DepartmentsSection, DoctorHospitalFields, EmergencySection, LabSection, SampleHospitalButton,
 } from '../components/HospitalSettings.jsx';
+import { EmailCard } from '../components/EmailCard.jsx';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
@@ -137,6 +138,7 @@ export default function Settings() {
           ))}
         </section>
 
+        <EmailCard />
         <EmergencySection s={s} set={set} />
         <LabSection s={s} set={set} HoursEditor={HoursEditor} />
 
